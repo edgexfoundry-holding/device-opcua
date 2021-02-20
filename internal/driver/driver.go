@@ -155,16 +155,16 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	c := opcua.NewClient(connectionInfo.Endpoint, opcua.SecurityMode(ua.MessageSecurityModeNone))
 	if err := c.Connect(ctx); err != nil {
 		driver.Logger.Warn(fmt.Sprintf("Driver.HandleWriteCommands: Failed to create OPCUA client, %s", err))
-		return  err
+		return err
 	}
 
 	for _, req := range reqs {
 		// handle every reqs every params
 		for _, param := range params {
-			err := d.handleWeadCommandRequest(c, req, param)
+			err := d.handleWriteCommandRequest(c, req, param)
 			if err != nil {
 				driver.Logger.Error(fmt.Sprintf("Driver.HandleWriteCommands: Handle write commands failed: %v", err))
-				return  err
+				return err
 			}
 		}
 
@@ -173,7 +173,7 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 	return err
 }
 
-func (d *Driver) handleWeadCommandRequest(deviceClient *opcua.Client, req sdkModel.CommandRequest,
+func (d *Driver) handleWriteCommandRequest(deviceClient *opcua.Client, req sdkModel.CommandRequest,
 	param *sdkModel.CommandValue) error {
 	var err error
 	nodeID := req.DeviceResourceName
@@ -200,7 +200,7 @@ func (d *Driver) handleWeadCommandRequest(deviceClient *opcua.Client, req sdkMod
 				NodeID:      id,
 				AttributeID: ua.AttributeIDValue,
 				Value: &ua.DataValue{
-					EncodingMask: uint8(6),  // encoding mask
+					EncodingMask: ua.DataValueValue, // encoding mask
 					Value:        v,
 				},
 			},
@@ -215,7 +215,6 @@ func (d *Driver) handleWeadCommandRequest(deviceClient *opcua.Client, req sdkMod
 	driver.Logger.Info(fmt.Sprintf("Driver.handleWriteCommands: write sucessfully, ", resp.Results[0]))
 	return nil
 }
-
 
 // Stop the protocol-specific DS code to shutdown gracefully, or
 // if the force parameter is 'true', immediately. The driver is responsible
@@ -317,7 +316,6 @@ func newResult(req sdkModel.CommandRequest, reading interface{}) (*sdkModel.Comm
 
 	return result, err
 }
-
 
 func newCommandValue(valueType sdkModel.ValueType, param *sdkModel.CommandValue) (interface{}, error) {
 	var commandValue interface{}
